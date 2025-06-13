@@ -7,7 +7,7 @@ const {numeroSolicitudes, validarDatos} = require('../Middleware/usuarioMiddlewa
 router.use(numeroSolicitudes)
 
 router.post('/', validarDatos, crearUsuario)
-router.get('/:usuarioId', obtenerTareasPorUsuario)
+router.get('/:id', obtenerTareasPorUsuario)
 
 
 module.exports = router

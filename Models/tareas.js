@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const tareaSchema = new mongoose.Schema({
     id :{type: String, required: true, unique: true},
     titulo : {type: String, required: true},
-    completada : {type: Boolean, required: true}
+    completada : {type: Boolean, default: false}
 })
 
 // Exportar eschema

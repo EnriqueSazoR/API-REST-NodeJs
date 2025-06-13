@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const {config} = require('dotenv')
 const tareaRoutes = require('./Routes/tareaRoutes')
 const usuarioRoutes = require('./Routes/usuarioRoutes')
+const authRoutes = require('./Routes/authRoutes')
 
 config()
 const app = express()
@@ -25,6 +26,7 @@ mongoose.connect(process.env.MONGO_URL, {
 // Rutas
 app.use('/api/tareas', tareaRoutes)
 app.use('/tareas/usuario', usuarioRoutes)
+app.use('/api', authRoutes)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => console.log(`Servidor ejecutandose en http://localhost:${port}`))

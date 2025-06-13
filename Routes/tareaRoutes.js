@@ -10,12 +10,13 @@ const {
 } = require('../Controllers/TareasController')
 
 const {validarDatos, numeroSolicitudes} = require('../Middleware/tareaMiddleware')
+const {autenticar} = require('../Middleware/usuarioMiddleware')
 
 // Middleware para contar el número de solicitudes
 router.use(numeroSolicitudes)
 
 // Rutas
-router.post('/', validarDatos, crearTarea)
+router.post('/', autenticar, validarDatos, crearTarea)
 router.get('/', obtenerTareas)
 router.get('/:id', obtenerTareaPorId)
 router.put('/:id', validarDatos, actualizarTarea)

@@ -1,11 +1,22 @@
 // Archivo para manejar controladores de las tareas
 const Tarea = require("../Models/tareas");
+const Usuario = require("../Models/usuario");
 
 const crearTarea = async (req, res) => {
   try {
     const { id, titulo, completada } = req.body;
-    const postTarea = new Tarea({ id, titulo, completada });
+    const postTarea = new Tarea({id, titulo, completada: completada || false });
     await postTarea.save();
+
+    // Asignar tarea creada al usuario autenticado
+    const usuarioAutenticado = await Usuario.findByIdAndUpdate(
+      req.userId,
+      { $push: { tareas: postTarea._id } },
+      { new: true, runValidators: true }
+    );
+    if (!usuarioAutenticado) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
     res.status(201).json({ mensaje: "Tarea Creada Exitosamente", postTarea });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -62,11 +73,10 @@ const eliminarTarea = async (req, res) => {
   }
 };
 
-
 module.exports = {
-    crearTarea,
-    obtenerTareas,
-    obtenerTareaPorId,
-    actualizarTarea,
-    eliminarTarea
-}
+  crearTarea,
+  obtenerTareas,
+  obtenerTareaPorId,
+  actualizarTarea,
+  eliminarTarea,
+};
