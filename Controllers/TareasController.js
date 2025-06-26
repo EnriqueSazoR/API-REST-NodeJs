@@ -4,8 +4,13 @@ const Usuario = require("../Models/usuario");
 
 const crearTarea = async (req, res) => {
   try {
-    const { id, titulo, completada } = req.body;
-    const postTarea = new Tarea({id, titulo, completada: completada || false });
+    const { id, titulo, completada, usuario } = req.body;
+    const postTarea = new Tarea({
+      id,
+      titulo,
+      completada: completada || false,
+      usuario
+    });
     await postTarea.save();
 
     // Asignar tarea creada al usuario autenticado
@@ -25,10 +30,23 @@ const crearTarea = async (req, res) => {
 
 const obtenerTareas = async (req, res) => {
   try {
-    const tareas = await Tarea.find();
+    const { page = 1, limit = 10, completada } = req.query;
+    const query =
+      completada !== undefined ? { completada: completada === "true" } : {};
+
+    const tareas = await Tarea.find(query)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate("usuario", "nombre");
+
+    const total = await Tarea.countDocuments(query);
+
     res.json({
       mensaje: "Lista de tareas",
-      tareas: tareas,
+      tareas,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -73,10 +91,45 @@ const eliminarTarea = async (req, res) => {
   }
 };
 
+const reporteTareas = async (req, res) => {
+  try {
+    const reporte = await Tarea.aggregate([
+      {
+        $group: {
+          _id: "$usuario",
+          completadas: { $sum: { $cond: ["$completada", 1, 0] } },
+          noCompletadas: { $sum: { $cond: ["$completada", 0, 1] } },
+        },
+      },
+      {
+        $lookup: {
+          from: "usuarios",
+          localField: "_id",
+          foreignField: "_id",
+          as: "usuarioInfo",
+        },
+      },
+      { $unwind: "$usuarioInfo" },
+      {
+        $project: {
+          nombreUsuario: "$usuarioInfo.nombre",
+          completadas: 1,
+          noCompletadas: 1,
+          _id: 0,
+        },
+      },
+    ]);
+    res.json(reporte);
+  } catch (error) {
+    res.status(500).json({ error: "Error al generar el reporte" });
+  }
+};
+
 module.exports = {
   crearTarea,
   obtenerTareas,
   obtenerTareaPorId,
   actualizarTarea,
   eliminarTarea,
+  reporteTareas,
 };

@@ -6,20 +6,23 @@ const {
     obtenerTareas,
     obtenerTareaPorId,
     actualizarTarea,
-    eliminarTarea
+    eliminarTarea,
+    reporteTareas
 } = require('../Controllers/TareasController')
 
 const {validarDatos, numeroSolicitudes} = require('../Middleware/tareaMiddleware')
 const {autenticar} = require('../Middleware/usuarioMiddleware')
+const {restrictToAdmin} = require('../Controllers/AuthController')
 
 // Middleware para contar el número de solicitudes
 router.use(numeroSolicitudes)
 
 // Rutas
+router.get('/reporte', reporteTareas)
 router.post('/', autenticar, validarDatos, crearTarea)
 router.get('/', obtenerTareas)
 router.get('/:id', obtenerTareaPorId)
 router.put('/:id', validarDatos, actualizarTarea)
-router.delete('/:id', eliminarTarea)
+router.delete('/:id', restrictToAdmin, eliminarTarea)
 
 module.exports = router

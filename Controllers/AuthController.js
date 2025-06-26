@@ -24,7 +24,7 @@ const login = async (req, res) => {
             return res.status(401).json({error: "Credenciales Inválidas"})
         }
         // Generar Token
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+        const token = jwt.sign({id: user._id, rol: user.rol}, process.env.JWT_SECRET, {
             expiresIn: '1h'
         })
         // Devolver el token
@@ -36,4 +36,24 @@ const login = async (req, res) => {
     
 }
 
-module.exports = {login}
+// Middleware para usar solo si el rol es Admin
+const restrictToAdmin = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token no proporcionado" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.rol !== 'Admin')
+    {
+      return res.status(403).json({ error: "Acceso denegado, requiere rol Admin" });
+    }
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+};
+
+module.exports = {login, restrictToAdmin}

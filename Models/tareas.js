@@ -5,7 +5,12 @@ const mongoose = require('mongoose')
 const tareaSchema = new mongoose.Schema({
     id :{type: String, required: true, unique: true},
     titulo : {type: String, required: true},
-    completada : {type: Boolean, default: false}
+    completada : {type: Boolean, default: false},
+    usuario: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario',
+    required: true
+  }
 })
 
 // Exportar eschema

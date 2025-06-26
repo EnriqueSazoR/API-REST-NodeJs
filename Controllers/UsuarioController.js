@@ -5,7 +5,7 @@ const Tarea = require("../Models/tareas");
 
 const crearUsuario = async (req, res) => {
   try {
-    const { nombre, email, clave, tareas } = req.body;
+    const { nombre, email, clave, rol, tareas } = req.body;
     // validar que los ID de tareas sean ObjectId válidos
     if (tareas && tareas.length > 0) {
       for (const tarea of tareas) {
@@ -20,7 +20,7 @@ const crearUsuario = async (req, res) => {
         }
       }
     }
-    const postUsuario = new Usuario({ nombre, email, clave, tareas });
+    const postUsuario = new Usuario({ nombre, email, clave, rol, tareas });
     await postUsuario.save();
     res
       .status(201)
@@ -53,7 +53,8 @@ const obtenerTareasPorUsuario = async (req, res) => {
   }
 };
 
+
 module.exports = {
   crearUsuario,
-  obtenerTareasPorUsuario,
+  obtenerTareasPorUsuario
 };
